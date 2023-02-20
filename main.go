@@ -15,6 +15,7 @@ func main() {
 
 func setUpRouts(h *handler.PostgresRepo) {
 	e := echo.New()
+	e.Static("/static", "static")
 	e.POST("/photo", h.UploadFile)
 	e.GET("/photo/:id", h.GetUser)
 	e.Logger.Fatal(e.Start(":3000"))

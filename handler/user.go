@@ -57,15 +57,23 @@ func (p *PostgresRepo) UploadFile(c echo.Context) error {
 		return err
 	}
 
+	newUser, err := p.create(req, file)
+	return c.JSON(http.StatusOK, &newUser)
+}
+
+func (p *PostgresRepo) create(req models.UserReq, file *multipart.FileHeader) (*models.User, error) {
+
 	newUser := &models.User{
 		Name:      req.Name,
 		Email:     req.Email,
 		PhotoName: file.Filename,
 	}
 
-	err = p.DB.Create(newUser).Error
-
-	return c.JSON(http.StatusOK, &newUser)
+	err := p.DB.Create(newUser).Error
+	if err != nil {
+		return nil, echo.ErrBadRequest
+	}
+	return newUser, err
 }
 
 func (p *PostgresRepo) GetUser(c echo.Context) error {

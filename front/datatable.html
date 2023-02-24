@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Data tables</title>
+    <link rel="stylesheet" href="src/css/jquery.dataTables.min.css">
+</head>
+<body>
+<table id="example">
+    <thead>
+    <tr>
+        <th>Api test</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>Name</td>
+    </tr>
+    </tbody>
+</table>
+<script src="src/js/jquery-3.5.1.js"></script>
+<script src="src/js/jquery.dataTables.min.js"></script>
+<script>
+    const BASE_URL = 'http://127.0.0.1:3000';
+    
+    $(document).ready(function () {
+        $(document).ready(function () {
+            $('#example').DataTable({
+                ajax: {
+                    url: 'data/objects_root_array.txt',
+                    dataSrc: '',
+                },
+                columns: [
+                    { data: 'name' },
+                    { data: 'position' },
+                    { data: 'office' },
+                    { data: 'extn' },
+                    { data: 'start_date' },
+                    { data: 'salary' },
+                ],
+            });
+        });
+
+        // $.ajax({
+        //     url: BASE_URL + "/photos/",
+        //     type: "GET",
+        //     crossDomain: true,
+        //     dataType: "json",
+        //     success: function (response) {
+        //         alert(response);
+        //     },
+        //     error: function (xhr, status) {
+        //         alert("error");
+        //     }
+        // });
+    })
+</script>
+</body>
+</html>

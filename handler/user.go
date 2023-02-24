@@ -8,6 +8,7 @@ import (
 	"mime/multipart"
 	"net/http"
 	"os"
+	"time"
 )
 
 type PostgresRepo struct {
@@ -67,6 +68,8 @@ func (p *PostgresRepo) create(req models.UserReq, file *multipart.FileHeader) (*
 		Name:      req.Name,
 		Email:     req.Email,
 		PhotoName: file.Filename,
+		CreatedAt: time.Now(),
+		//Status:
 	}
 
 	err := p.DB.Create(newUser).Error
@@ -87,4 +90,16 @@ func (p *PostgresRepo) GetUser(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, &user)
+}
+
+func (p *PostgresRepo) GetUsers(c echo.Context) error {
+
+	var users *[]models.User
+	err := p.DB.Find(&users).Error
+	//.Where("status = ?", "active")
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, &users)
 }

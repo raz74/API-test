@@ -2,6 +2,7 @@ package handler
 
 import (
 	"api-test/models"
+	"fmt"
 	"github.com/labstack/echo"
 	"gorm.io/gorm"
 	"io"
@@ -10,6 +11,8 @@ import (
 	"os"
 	"time"
 )
+
+const BASE_URL = "http://127.0.0.1:3000"
 
 type PostgresRepo struct {
 	DB *gorm.DB
@@ -58,8 +61,9 @@ func (p *PostgresRepo) UploadFile(c echo.Context) error {
 		return err
 	}
 
-	newUser, err := p.create(req, file)
-	return c.JSON(http.StatusOK, &newUser)
+	_, _ = p.create(req, file)
+	//return c.JSON(http.StatusOK, &newUser)
+	return c.Redirect(http.StatusOK, "http://127.0.0.1:9000/")
 }
 
 func (p *PostgresRepo) create(req models.UserReq, file *multipart.FileHeader) (*models.User, error) {
@@ -69,7 +73,7 @@ func (p *PostgresRepo) create(req models.UserReq, file *multipart.FileHeader) (*
 		Email:     req.Email,
 		PhotoName: file.Filename,
 		CreatedAt: time.Now(),
-		//Status:
+		Status:    "active",
 	}
 
 	err := p.DB.Create(newUser).Error
@@ -86,20 +90,45 @@ func (p *PostgresRepo) GetUser(c echo.Context) error {
 	var user *models.User
 	err := p.DB.Where("id = ?", id).Find(&user).Error
 	if err != nil {
-		return err
+		return echo.ErrBadRequest
 	}
+	//imageUrl := BASE_URL + user.PhotoName
 
 	return c.JSON(http.StatusOK, &user)
 }
 
 func (p *PostgresRepo) GetUsers(c echo.Context) error {
 
-	var users *[]models.User
-	err := p.DB.Find(&users).Error
-	//.Where("status = ?", "active")
+	var users []models.User
+	err := p.DB.Where("status = ?", "active").Find(&users).Error
 	if err != nil {
-		return err
+		return echo.ErrBadRequest
 	}
-
-	return c.JSON(http.StatusOK, &users)
+	type OutputStruct struct {
+		Id       int    `json:"id"`
+		Email    string `json:"email"`
+		Name     string `json:"name"`
+		Status   string `json:"status"`
+		ImageUrl string `json:"image_url"`
+	}
+	var outputData []OutputStruct
+	for _, user := range users {
+		if len(user.Name) > 0 {
+			outputData = append(outputData, OutputStruct{
+				Id:       user.Id,
+				Name:     user.Name,
+				Email:    user.Email,
+				Status:   user.Status,
+				ImageUrl: BASE_URL + "/static/" + user.PhotoName,
+			})
+		}
+	}
+	type userOutput struct {
+		Data []OutputStruct `json:"data"`
+	}
+	err = c.JSON(http.StatusOK, &userOutput{Data: outputData})
+	if err != nil {
+		fmt.Println(err)
+	}
+	return err
 }

@@ -5,6 +5,7 @@ import (
 	"api-test/repository"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
+	_ "github.com/labstack/gommon/log"
 )
 
 func main() {
@@ -16,6 +17,8 @@ func main() {
 
 func setUpRouts(h *handler.PostgresRepo) {
 	e := echo.New()
+	e.Use(middleware.Logger())
+
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{"*"},
 		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
